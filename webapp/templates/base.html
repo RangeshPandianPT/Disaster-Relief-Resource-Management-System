@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DRRMS{% endblock %} - Disaster Relief Management</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-icon">🌍</span>
+            <span class="nav-title">DRRMS</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/" class="{% if active_page == 'dashboard' %}active{% endif %}">
+                <span>📊</span> Dashboard
+            </a></li>
+            <li><a href="/disasters" class="{% if active_page == 'disasters' %}active{% endif %}">
+                <span>🌀</span> Disasters
+            </a></li>
+            <li><a href="/inventory" class="{% if active_page == 'inventory' %}active{% endif %}">
+                <span>📦</span> Inventory
+            </a></li>
+            <li><a href="/requests" class="{% if active_page == 'requests' %}active{% endif %}">
+                <span>📋</span> Requests
+            </a></li>
+            <li><a href="/volunteers" class="{% if active_page == 'volunteers' %}active{% endif %}">
+                <span>👥</span> Volunteers
+            </a></li>
+            <li><a href="/donations" class="{% if active_page == 'donations' %}active{% endif %}">
+                <span>💰</span> Donations
+            </a></li>
+        </ul>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <p>DRRMS - Disaster Relief Resource Management System &copy; 2024</p>
+    </footer>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Disasters{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">🌀 Disaster Management</h1>
+        <div class="page-actions">
+            <select id="status-filter" class="filter-select" onchange="loadDisasters()">
+                <option value="">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Monitoring">Monitoring</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="cards-grid" id="disasters-container">
+        <p class="loading">Loading disasters...</p>
+    </div>
+</div>
+
+<!-- Disaster Detail Modal -->
+<div id="disaster-modal" class="modal hidden">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <div id="modal-body"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadDisasters() {
+    const status = document.getElementById('status-filter').value;
+    const url = status ? `/api/disasters?status=${status}` : '/api/disasters';
+    
+    try {
+        const res = await fetch(url);
+        const disasters = await res.json();
+        
+        const container = document.getElementById('disasters-container');
+        
+        if (disasters.length === 0) {
+            container.innerHTML = '<p class="no-data">No disasters found.</p>';
+            return;
+        }
+        
+        container.innerHTML = disasters.map(d => `
+            <div class="disaster-card ${d.status.toLowerCase()}" onclick="viewDisaster(${d.disaster_id})">
+                <div class="card-header">
+                    <span class="severity-badge ${d.severity.toLowerCase()}">${getSeverityIcon(d.severity)} ${d.severity}</span>
+                    <span class="status-badge ${d.status.toLowerCase()}">${d.status}</span>
+                </div>
+                <h3>${d.disaster_name}</h3>
+                <p class="disaster-type">${getTypeIcon(d.disaster_type)} ${d.disaster_type}</p>
+                <p class="disaster-location">📍 ${d.affected_location}</p>
+                <div class="card-stats">
+                    <span>📍 ${d.area_count} areas</span>
+                    <span>👥 ${formatNumber(d.total_affected)} affected</span>
+                </div>
+                <div class="card-footer">
+                    <span>Started: ${d.start_date}</span>
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading disasters:', error);
+    }
+}
+
+async function viewDisaster(id) {
+    try {
+        const res = await fetch(`/api/disasters/${id}`);
+        const data = await res.json();
+        
+        const d = data.disaster;
+        const modal = document.getElementById('disaster-modal');
+        const body = document.getElementById('modal-body');
+        
+        body.innerHTML = `
+            <div class="disaster-detail">
+                <div class="detail-header">
+                    <h2>${d.disaster_name}</h2>
+                    <span class="severity-badge ${d.severity.toLowerCase()}">${getSeverityIcon(d.severity)} ${d.severity}</span>
+                    <span class="status-badge ${d.status.toLowerCase()}">${d.status}</span>
+                </div>
+                
+                <div class="detail-info">
+                    <p><strong>Type:</strong> ${getTypeIcon(d.disaster_type)} ${d.disaster_type}</p>
+                    <p><strong>Location:</strong> ${d.affected_location}</p>
+                    <p><strong>Start Date:</strong> ${d.start_date}</p>
+                    ${d.end_date ? `<p><strong>End Date:</strong> ${d.end_date}</p>` : ''}
+                    ${d.description ? `<p><strong>Description:</strong> ${d.description}</p>` : ''}
+                </div>
+                
+                <h3>📍 Affected Areas (${data.areas.length})</h3>
+                <div class="areas-list">
+                    ${data.areas.map(a => `
+                        <div class="area-item">
+                            <span class="priority-badge ${a.priority.toLowerCase()}">${a.priority}</span>
+                            <strong>${a.area_name}</strong>
+                            <span>${a.district}, ${a.state}</span>
+                            <span>👥 ${formatNumber(a.population_affected)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <h3>👥 Relief Teams (${data.teams.length})</h3>
+                <div class="teams-list">
+                    ${data.teams.map(t => `
+                        <div class="team-item">
+                            <strong>${t.team_name}</strong>
+                            <span class="team-type">${t.team_type}</span>
+                            <span>Leader: ${t.leader_name}</span>
+                            <span>👷 ${t.volunteer_count} volunteers</span>
+                            <span class="status-badge ${t.status.toLowerCase()}">${t.status}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+        modal.classList.remove('hidden');
+        
+    } catch (error) {
+        console.error('Error loading disaster:', error);
+    }
+}
+
+function closeModal() {
+    document.getElementById('disaster-modal').classList.add('hidden');
+}
+
+function getSeverityIcon(severity) {
+    return {'Extreme': '🔴', 'Severe': '🟠', 'Moderate': '🟡', 'Minor': '🟢'}[severity] || '⚪';
+}
+
+function getTypeIcon(type) {
+    return {'Flood': '🌊', 'Cyclone': '🌀', 'Earthquake': '🌍', 'Drought': '☀️', 'Landslide': '⛰️'}[type] || '💥';
+}
+
+function formatNumber(num) {
+    if (num >= 100000) return (num / 100000).toFixed(1) + 'L';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num?.toLocaleString() || '0';
+}
+
+// Load on page ready
+document.addEventListener('DOMContentLoaded', loadDisasters);
+</script>
+{% endblock %}

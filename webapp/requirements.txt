@@ -1,0 +1,4 @@
+# DRRMS Web Application Dependencies
+flask>=2.3.0
+mysql-connector-python>=8.0.0
+python-dotenv>=1.0.0

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Volunteers{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">👥 Volunteer Directory</h1>
+        <div class="page-actions">
+            <select id="availability-filter" class="filter-select" onchange="loadVolunteers()">
+                <option value="">All Availability</option>
+                <option value="Available">✅ Available</option>
+                <option value="Busy">🔄 Deployed</option>
+                <option value="Unavailable">❌ Unavailable</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="cards-grid" id="volunteers-container">
+        <p class="loading">Loading volunteers...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadVolunteers() {
+    const availability = document.getElementById('availability-filter').value;
+    const url = availability ? `/api/volunteers?availability=${availability}` : '/api/volunteers';
+    
+    try {
+        const res = await fetch(url);
+        const volunteers = await res.json();
+        
+        const container = document.getElementById('volunteers-container');
+        
+        if (volunteers.length === 0) {
+            container.innerHTML = '<p class="no-data">No volunteers found.</p>';
+            return;
+        }
+        
+        container.innerHTML = volunteers.map(v => `
+            <div class="volunteer-card ${v.availability.toLowerCase()}">
+                <div class="card-header">
+                    <span class="avatar">${v.name.charAt(0)}</span>
+                    <span class="availability-badge ${v.availability.toLowerCase()}">
+                        ${getAvailabilityIcon(v.availability)} ${v.availability}
+                    </span>
+                </div>
+                <h3>${v.name}</h3>
+                <p class="skills">🛠️ ${v.skills || 'No skills listed'}</p>
+                <p class="experience">📊 ${v.experience_years || 0} years experience</p>
+                ${v.team_name ? `
+                    <div class="assignment">
+                        <strong>Assigned to:</strong>
+                        <p>${v.team_name} (${v.team_type})</p>
+                        <p>🌀 ${v.disaster_name}</p>
+                    </div>
+                ` : '<p class="unassigned">Not assigned to any team</p>'}
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading volunteers:', error);
+    }
+}
+
+function getAvailabilityIcon(availability) {
+    return {'Available': '✅', 'Busy': '🔄', 'Unavailable': '❌'}[availability] || '❓';
+}
+
+document.addEventListener('DOMContentLoaded', loadVolunteers);
+</script>
+{% endblock %}
