@@ -81,11 +81,74 @@ const chartColors = {
     gray: '#6b7280'
 };
 
-// Chart defaults
-Chart.defaults.color = '#94a3b8';
-Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+// Theme Management
+function initTheme() {
+    const savedTheme = localStorage.getItem('drrms-theme') || 'light';
+    setTheme(savedTheme);
+}
+
+function setTheme(theme) {
+    const html = document.documentElement;
+    const themeIcon = document.getElementById('themeIcon');
+    const themeText = document.getElementById('themeText');
+    
+    if (theme === 'dark') {
+        html.setAttribute('data-theme', 'dark');
+        if (themeIcon) themeIcon.textContent = '🌙';
+        if (themeText) themeText.textContent = 'Dark';
+        updateChartColors(true);
+    } else {
+        html.removeAttribute('data-theme');
+        if (themeIcon) themeIcon.textContent = '☀️';
+        if (themeText) themeText.textContent = 'Light';
+        updateChartColors(false);
+    }
+    
+    localStorage.setItem('drrms-theme', theme);
+}
+
+function toggleTheme() {
+    const currentTheme = localStorage.getItem('drrms-theme') || 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+}
+
+function updateChartColors(isDark) {
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.color = isDark ? '#94a3b8' : '#64748b';
+        Chart.defaults.borderColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+        
+        // Update existing charts if any
+        Chart.instances.forEach(chart => {
+            if (chart.options.scales) {
+                Object.values(chart.options.scales).forEach(scale => {
+                    if (scale.grid) {
+                        scale.grid.color = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+                    }
+                    if (scale.ticks) {
+                        scale.ticks.color = isDark ? '#94a3b8' : '#64748b';
+                    }
+                });
+            }
+            chart.update('none');
+        });
+    }
+}
+
+// Initialize theme before page renders (prevent flash)
+initTheme();
 
 // Page ready
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🌍 DRRMS Web Application Loaded');
+    
+    // Setup theme toggle button
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+    }
+    
+    // Re-apply theme on DOM load to ensure UI is correct
+    const savedTheme = localStorage.getItem('drrms-theme') || 'light';
+    setTheme(savedTheme);
 });
