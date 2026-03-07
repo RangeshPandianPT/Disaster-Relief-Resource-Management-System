@@ -1,0 +1,314 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <h1 class="page-title">📊 Dashboard</h1>
+    <p class="page-subtitle">Real-time overview of disaster relief operations</p>
+    
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card stat-disasters">
+            <div class="stat-icon">🌀</div>
+            <div class="stat-content">
+                <span class="stat-value" id="stat-disasters">-</span>
+                <span class="stat-label">Active Disasters</span>
+                <span class="stat-detail" id="stat-disasters-detail"></span>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-population">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+                <span class="stat-value" id="stat-population">-</span>
+                <span class="stat-label">Affected Population</span>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-requests">
+            <div class="stat-icon">📋</div>
+            <div class="stat-content">
+                <span class="stat-value" id="stat-requests">-</span>
+                <span class="stat-label">Pending Requests</span>
+                <span class="stat-detail" id="stat-requests-detail"></span>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-volunteers">
+            <div class="stat-icon">👷</div>
+            <div class="stat-content">
+                <span class="stat-value" id="stat-volunteers">-</span>
+                <span class="stat-label">Volunteers Deployed</span>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-alerts">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-content">
+                <span class="stat-value" id="stat-alerts">-</span>
+                <span class="stat-label">Low Stock Alerts</span>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-donations">
+            <div class="stat-icon">💰</div>
+            <div class="stat-content">
+                <span class="stat-value" id="stat-donations">-</span>
+                <span class="stat-label">Donations (30 days)</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Row 1 -->
+    <div class="charts-row">
+        <div class="chart-card">
+            <h3>🎯 Request Fulfillment Rate</h3>
+            <div class="fulfillment-gauge">
+                <canvas id="fulfillmentChart"></canvas>
+                <div class="gauge-value" id="gauge-value">0%</div>
+            </div>
+        </div>
+        
+        <div class="chart-card">
+            <h3>🌀 Disasters by Type</h3>
+            <canvas id="disasterTypesChart"></canvas>
+        </div>
+        
+        <div class="chart-card">
+            <h3>📊 Request Status</h3>
+            <canvas id="requestStatusChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Charts Row 2 -->
+    <div class="charts-row">
+        <div class="chart-card wide">
+            <h3>📈 Donation Trends (12 Months)</h3>
+            <canvas id="donationTrendsChart"></canvas>
+        </div>
+        
+        <div class="chart-card">
+            <h3>📦 Resource Levels by Category</h3>
+            <canvas id="resourceLevelsChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Alerts Section -->
+    <div class="alerts-section">
+        <h3>⚠️ Active Alerts</h3>
+        <div id="alerts-container" class="alerts-container">
+            <p class="loading">Loading alerts...</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Load dashboard data
+async function loadDashboard() {
+    try {
+        // Load stats
+        const statsRes = await fetch('/api/dashboard/stats');
+        const stats = await statsRes.json();
+        
+        // Update stat cards
+        document.getElementById('stat-disasters').textContent = stats.disasters?.count || 0;
+        document.getElementById('stat-disasters-detail').textContent = 
+            `🔴 ${stats.disasters?.extreme || 0} Extreme | 🟠 ${stats.disasters?.severe || 0} Severe`;
+        
+        document.getElementById('stat-population').textContent = 
+            formatNumber(stats.population || 0);
+        
+        document.getElementById('stat-requests').textContent = stats.requests?.total || 0;
+        document.getElementById('stat-requests-detail').textContent = 
+            `🔴 ${stats.requests?.critical || 0} Critical | 🟠 ${stats.requests?.high || 0} High`;
+        
+        document.getElementById('stat-volunteers').textContent = 
+            `${stats.volunteers?.deployed || 0}/${stats.volunteers?.total || 0}`;
+        
+        document.getElementById('stat-alerts').textContent = stats.lowStock || 0;
+        
+        document.getElementById('stat-donations').textContent = 
+            `₹${formatNumber(stats.donations?.monetary || 0)}`;
+        
+        // Load charts
+        await loadCharts();
+        
+        // Load alerts
+        await loadAlerts();
+        
+    } catch (error) {
+        console.error('Dashboard load error:', error);
+    }
+}
+
+async function loadCharts() {
+    // Fulfillment Rate Gauge
+    const fulfillmentRes = await fetch('/api/charts/fulfillment-rate');
+    const fulfillment = await fulfillmentRes.json();
+    
+    document.getElementById('gauge-value').textContent = `${fulfillment.rate}%`;
+    
+    new Chart(document.getElementById('fulfillmentChart'), {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [fulfillment.rate, 100 - fulfillment.rate],
+                backgroundColor: ['#10b981', '#e5e7eb'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            cutout: '75%',
+            plugins: { legend: { display: false } }
+        }
+    });
+    
+    // Disaster Types Pie
+    const typesRes = await fetch('/api/charts/disaster-types');
+    const types = await typesRes.json();
+    
+    new Chart(document.getElementById('disasterTypesChart'), {
+        type: 'pie',
+        data: {
+            labels: types.map(t => t.label),
+            datasets: [{
+                data: types.map(t => t.value),
+                backgroundColor: ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6']
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+    
+    // Request Status
+    const statusRes = await fetch('/api/charts/request-status');
+    const statuses = await statusRes.json();
+    
+    const statusColors = {
+        'Pending': '#f97316',
+        'Approved': '#3b82f6',
+        'Fulfilled': '#22c55e',
+        'Partially_Fulfilled': '#eab308',
+        'Rejected': '#ef4444'
+    };
+    
+    new Chart(document.getElementById('requestStatusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: statuses.map(s => s.label),
+            datasets: [{
+                data: statuses.map(s => s.value),
+                backgroundColor: statuses.map(s => statusColors[s.label] || '#6b7280')
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+    
+    // Donation Trends
+    const trendsRes = await fetch('/api/charts/donation-trends');
+    const trends = await trendsRes.json();
+    
+    new Chart(document.getElementById('donationTrendsChart'), {
+        type: 'line',
+        data: {
+            labels: trends.map(t => t.month),
+            datasets: [{
+                label: 'Monetary (₹)',
+                data: trends.map(t => t.monetary),
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: value => `₹${formatNumber(value)}`
+                    }
+                }
+            }
+        }
+    });
+    
+    // Resource Levels
+    const levelsRes = await fetch('/api/charts/resource-levels');
+    const levels = await levelsRes.json();
+    
+    new Chart(document.getElementById('resourceLevelsChart'), {
+        type: 'bar',
+        data: {
+            labels: levels.map(l => l.label),
+            datasets: [
+                {
+                    label: 'Available',
+                    data: levels.map(l => l.available),
+                    backgroundColor: '#22c55e'
+                },
+                {
+                    label: 'Minimum Required',
+                    data: levels.map(l => l.minimum),
+                    backgroundColor: '#ef4444'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+
+async function loadAlerts() {
+    const alertsRes = await fetch('/api/inventory/alerts');
+    const alerts = await alertsRes.json();
+    
+    const container = document.getElementById('alerts-container');
+    
+    if (alerts.length === 0) {
+        container.innerHTML = '<p class="no-alerts">✅ No active alerts. All inventory levels are healthy!</p>';
+        return;
+    }
+    
+    container.innerHTML = alerts.slice(0, 5).map(a => `
+        <div class="alert-item ${a.quantity_available === 0 ? 'critical' : 'warning'}">
+            <span class="alert-icon">${a.quantity_available === 0 ? '🔴' : '🟡'}</span>
+            <div class="alert-content">
+                <strong>${a.resource_name}</strong>
+                <span>${a.warehouse_location}</span>
+            </div>
+            <div class="alert-value">
+                ${a.quantity_available} / ${a.min_stock}
+                <small>(${a.stock_pct}%)</small>
+            </div>
+        </div>
+    `).join('');
+}
+
+function formatNumber(num) {
+    if (num >= 10000000) return (num / 10000000).toFixed(1) + 'Cr';
+    if (num >= 100000) return (num / 100000).toFixed(1) + 'L';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toLocaleString();
+}
+
+// Load on page ready
+document.addEventListener('DOMContentLoaded', loadDashboard);
+</script>
+{% endblock %}

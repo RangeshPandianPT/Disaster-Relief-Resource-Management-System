@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Requests{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">📋 Resource Requests</h1>
+        <div class="page-actions">
+            <select id="status-filter" class="filter-select" onchange="loadRequests()">
+                <option value="">All Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Fulfilled">Fulfilled</option>
+                <option value="Partially_Fulfilled">Partially Fulfilled</option>
+            </select>
+            <select id="urgency-filter" class="filter-select" onchange="loadRequests()">
+                <option value="">All Urgency</option>
+                <option value="Critical">🔴 Critical</option>
+                <option value="High">🟠 High</option>
+                <option value="Medium">🟡 Medium</option>
+                <option value="Low">🟢 Low</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="table-container">
+        <table class="data-table" id="requests-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Area</th>
+                    <th>Resource</th>
+                    <th>Quantity</th>
+                    <th>Urgency</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody id="requests-body">
+                <tr><td colspan="7" class="loading">Loading requests...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadRequests() {
+    const status = document.getElementById('status-filter').value;
+    const urgency = document.getElementById('urgency-filter').value;
+    
+    let url = '/api/requests?';
+    if (status) url += `status=${status}&`;
+    if (urgency) url += `urgency=${urgency}`;
+    
+    try {
+        const res = await fetch(url);
+        const requests = await res.json();
+        
+        const tbody = document.getElementById('requests-body');
+        
+        if (requests.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="no-data">No requests found.</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = requests.map(r => `
+            <tr>
+                <td>${r.request_id}</td>
+                <td>${r.area_name}</td>
+                <td>${r.resource_name}</td>
+                <td>${formatNumber(r.quantity_requested)} ${r.unit}</td>
+                <td>
+                    <span class="urgency-badge ${r.urgency.toLowerCase()}">
+                        ${getUrgencyIcon(r.urgency)} ${r.urgency}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-pill ${r.status.toLowerCase()}">
+                        ${getStatusIcon(r.status)} ${r.status.replace('_', ' ')}
+                    </span>
+                </td>
+                <td>${r.request_date}</td>
+            </tr>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading requests:', error);
+    }
+}
+
+function getUrgencyIcon(urgency) {
+    return {'Critical': '🔴', 'High': '🟠', 'Medium': '🟡', 'Low': '🟢'}[urgency] || '⚪';
+}
+
+function getStatusIcon(status) {
+    return {
+        'Pending': '⏳', 'Approved': '👍', 'Fulfilled': '✅',
+        'Partially_Fulfilled': '🔄', 'Rejected': '❌'
+    }[status] || '❓';
+}
+
+function formatNumber(num) {
+    return num?.toLocaleString() || '0';
+}
+
+document.addEventListener('DOMContentLoaded', loadRequests);
+</script>
+{% endblock %}

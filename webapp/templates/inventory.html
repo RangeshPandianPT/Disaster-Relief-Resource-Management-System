@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">📦 Inventory Management</h1>
+        <div class="page-actions">
+            <select id="category-filter" class="filter-select" onchange="loadInventory()">
+                <option value="">All Categories</option>
+                <option value="Food">🍚 Food</option>
+                <option value="Water">💧 Water</option>
+                <option value="Medicine">💊 Medicine</option>
+                <option value="Shelter">🏕️ Shelter</option>
+                <option value="Clothing">👕 Clothing</option>
+            </select>
+            <label class="checkbox-label">
+                <input type="checkbox" id="low-stock-filter" onchange="loadInventory()">
+                Show Low Stock Only
+            </label>
+        </div>
+    </div>
+    
+    <div class="table-container">
+        <table class="data-table" id="inventory-table">
+            <thead>
+                <tr>
+                    <th>Resource</th>
+                    <th>Category</th>
+                    <th>Warehouse</th>
+                    <th>Available</th>
+                    <th>Minimum</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="inventory-body">
+                <tr><td colspan="6" class="loading">Loading inventory...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Alerts Section -->
+    <div class="alerts-section" id="alerts-section">
+        <h3>⚠️ Low Stock Alerts</h3>
+        <div id="alerts-container" class="alerts-container"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadInventory() {
+    const category = document.getElementById('category-filter').value;
+    const lowStock = document.getElementById('low-stock-filter').checked;
+    
+    let url = '/api/inventory?';
+    if (category) url += `category=${category}&`;
+    if (lowStock) url += 'lowStock=true';
+    
+    try {
+        const res = await fetch(url);
+        const inventory = await res.json();
+        
+        const tbody = document.getElementById('inventory-body');
+        
+        if (inventory.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="no-data">No inventory items found.</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = inventory.map(i => `
+            <tr class="${i.stock_status.toLowerCase()}">
+                <td><strong>${i.resource_name}</strong></td>
+                <td>${getCategoryIcon(i.category)} ${i.category}</td>
+                <td>${i.warehouse_location}</td>
+                <td>${formatNumber(i.quantity_available)} ${i.unit}</td>
+                <td>${formatNumber(i.min_stock)}</td>
+                <td>
+                    <span class="status-pill ${i.stock_status.toLowerCase()}">
+                        ${getStatusIcon(i.stock_status)} ${i.stock_status}
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+        
+        // Load alerts
+        await loadAlerts();
+        
+    } catch (error) {
+        console.error('Error loading inventory:', error);
+    }
+}
+
+async function loadAlerts() {
+    try {
+        const res = await fetch('/api/inventory/alerts');
+        const alerts = await res.json();
+        
+        const container = document.getElementById('alerts-container');
+        const section = document.getElementById('alerts-section');
+        
+        if (alerts.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+        
+        section.style.display = 'block';
+        container.innerHTML = alerts.map(a => `
+            <div class="alert-card ${a.quantity_available === 0 ? 'critical' : 'warning'}">
+                <div class="alert-header">
+                    <span class="alert-icon">${a.quantity_available === 0 ? '🔴' : '🟡'}</span>
+                    <strong>${a.resource_name}</strong>
+                </div>
+                <p>${a.warehouse_location}</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${Math.min(a.stock_pct, 100)}%"></div>
+                </div>
+                <div class="alert-stats">
+                    <span>Available: ${a.quantity_available}</span>
+                    <span>Min: ${a.min_stock}</span>
+                    <span>${a.stock_pct}%</span>
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading alerts:', error);
+    }
+}
+
+function getCategoryIcon(category) {
+    return {'Food': '🍚', 'Water': '💧', 'Medicine': '💊', 'Shelter': '🏕️', 'Clothing': '👕'}[category] || '📦';
+}
+
+function getStatusIcon(status) {
+    return {'OUT': '🔴', 'LOW': '🟡', 'OK': '🟢'}[status] || '⚪';
+}
+
+function formatNumber(num) {
+    return num?.toLocaleString() || '0';
+}
+
+document.addEventListener('DOMContentLoaded', loadInventory);
+</script>
+{% endblock %}

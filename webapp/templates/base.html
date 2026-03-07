@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="description" content="DRRMS - Disaster Relief Resource Management System for efficient disaster response coordination">
+    <title>{% block title %}DRRMS{% endblock %} - Disaster Relief Management</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Smooth Scroll -->
+    <style>html { scroll-behavior: smooth; }</style>
+    
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="nav-brand">
+            <span class="nav-icon">🌍</span>
+            <span class="nav-title">DRRMS</span>
+        </div>
+        
+        <ul class="nav-links" id="navLinks" role="menubar">
+            <li role="none"><a href="/" role="menuitem" class="{% if active_page == 'dashboard' %}active{% endif %}">
+                <span>📊</span> Dashboard
+            </a></li>
+            <li role="none"><a href="/disasters" role="menuitem" class="{% if active_page == 'disasters' %}active{% endif %}">
+                <span>🌀</span> Disasters
+            </a></li>
+            <li role="none"><a href="/inventory" role="menuitem" class="{% if active_page == 'inventory' %}active{% endif %}">
+                <span>📦</span> Inventory
+            </a></li>
+            <li role="none"><a href="/requests" role="menuitem" class="{% if active_page == 'requests' %}active{% endif %}">
+                <span>📋</span> Requests
+            </a></li>
+            <li role="none"><a href="/volunteers" role="menuitem" class="{% if active_page == 'volunteers' %}active{% endif %}">
+                <span>👥</span> Volunteers
+            </a></li>
+            <li role="none"><a href="/donations" role="menuitem" class="{% if active_page == 'donations' %}active{% endif %}">
+                <span>💰</span> Donations
+            </a></li>
+        </ul>
+        
+        <div class="nav-actions">
+            <button class="theme-toggle tooltip" id="themeToggle" aria-label="Toggle theme" data-tooltip="Switch theme">
+                <span class="theme-toggle-icon" id="themeIcon">☀️</span>
+                <span class="theme-toggle-text" id="themeText">Light</span>
+            </button>
+            <!-- Hamburger Menu Button -->
+            <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main-content" role="main">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" id="scrollToTop" aria-label="Scroll to top">
+        ⬆️
+    </button>
+    
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <p>DRRMS - Disaster Relief Resource Management System &copy; 2024 | 
+            <span class="footer-tagline">Coordinating Relief, Saving Lives</span>
+        </p>
+    </footer>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Donations{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1 class="page-title">💰 Donations</h1>
+    </div>
+    
+    <!-- Donor Summary -->
+    <h2>🏆 Top Donors</h2>
+    <div class="cards-grid small" id="donors-container">
+        <p class="loading">Loading donors...</p>
+    </div>
+    
+    <!-- Recent Donations -->
+    <h2 style="margin-top: 2rem;">📋 Recent Donations</h2>
+    <div class="table-container">
+        <table class="data-table" id="donations-table">
+            <thead>
+                <tr>
+                    <th>Donor</th>
+                    <th>Type</th>
+                    <th>Disaster</th>
+                    <th>Amount/Resource</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="donations-body">
+                <tr><td colspan="6" class="loading">Loading donations...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadDonations() {
+    // Load donors
+    try {
+        const donorsRes = await fetch('/api/donors');
+        const donors = await donorsRes.json();
+        
+        const donorsContainer = document.getElementById('donors-container');
+        
+        donorsContainer.innerHTML = donors.slice(0, 6).map(d => `
+            <div class="donor-card">
+                <div class="donor-icon">${getDonorIcon(d.donor_type)}</div>
+                <h4>${d.donor_name}</h4>
+                <p class="donor-type">${d.donor_type}</p>
+                <div class="donor-stats">
+                    <span>💰 ₹${formatNumber(d.total_monetary)}</span>
+                    <span>📦 ${d.donation_count} donations</span>
+                </div>
+            </div>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading donors:', error);
+    }
+    
+    // Load donations
+    try {
+        const donationsRes = await fetch('/api/donations');
+        const donations = await donationsRes.json();
+        
+        const tbody = document.getElementById('donations-body');
+        
+        tbody.innerHTML = donations.map(d => `
+            <tr>
+                <td>
+                    <strong>${d.donor_name}</strong>
+                    <span class="donor-type-small">${d.donor_type}</span>
+                </td>
+                <td>${d.donation_type === 'Money' ? '💵' : '📦'} ${d.donation_type}</td>
+                <td>${d.disaster_name || 'General Fund'}</td>
+                <td>
+                    ${d.donation_type === 'Money' 
+                        ? `₹${formatNumber(d.amount)}`
+                        : `${d.quantity} ${d.resource_name || ''}`
+                    }
+                </td>
+                <td>${d.donation_date}</td>
+                <td><span class="status-pill ${d.status.toLowerCase()}">${d.status}</span></td>
+            </tr>
+        `).join('');
+        
+    } catch (error) {
+        console.error('Error loading donations:', error);
+    }
+}
+
+function getDonorIcon(type) {
+    return {'Corporate': '🏢', 'Individual': '👤', 'NGO': '🤝'}[type] || '❓';
+}
+
+function formatNumber(num) {
+    if (num >= 10000000) return (num / 10000000).toFixed(1) + 'Cr';
+    if (num >= 100000) return (num / 100000).toFixed(1) + 'L';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num?.toLocaleString() || '0';
+}
+
+document.addEventListener('DOMContentLoaded', loadDonations);
+</script>
+{% endblock %}
