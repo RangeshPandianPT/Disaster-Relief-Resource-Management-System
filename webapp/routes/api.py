@@ -537,3 +537,57 @@ def get_donors():
         ORDER BY total_monetary DESC
     """)
     return jsonify(result or [])
+
+
+# ============================================================
+# LIVE ALERTS API (FEATURE 3)
+# ============================================================
+
+@api.route('/live_alerts')
+def live_alerts():
+    """Get real-time alerts for critical active disasters and urgent pending requests."""
+    # Look for very recent critical disasters (Mocked as last 24h for demonstration, 
+    # but in a real system we'd track last_seen_id)
+    recent_disasters = query_db("""
+        SELECT disaster_id, disaster_name, severity, start_date
+        FROM Disaster
+        WHERE status = 'Active' AND severity IN ('Extreme', 'Severe')
+        ORDER BY start_date DESC LIMIT 5
+    """)
+    
+    # Look for very recent urgent requests
+    urgent_requests = query_db("""
+        SELECT r.request_id, r.urgency, r.request_date, res.resource_name, aa.area_name
+        FROM Request r
+        INNER JOIN Resource res ON r.resource_id = res.resource_id
+        INNER JOIN Affected_Area aa ON r.area_id = aa.area_id
+        WHERE r.status = 'Pending' AND r.urgency IN ('Critical', 'High')
+        ORDER BY r.request_date DESC LIMIT 5
+    """)
+    
+    alerts = []
+    
+    if recent_disasters:
+        for d in recent_disasters:
+            alerts.append({
+                'id': f"d_{d['disaster_id']}",
+                'type': 'disaster',
+                'title': f"{d['severity']} Disaster: {d['disaster_name']}",
+                'timestamp': d['start_date'].strftime('%Y-%m-%d') if d['start_date'] else '',
+                'severity': 'critical' if d['severity'] == 'Extreme' else 'warning',
+                'link': f"/disasters"
+            })
+            
+    if urgent_requests:
+        for r in urgent_requests:
+            alerts.append({
+                'id': f"r_{r['request_id']}",
+                'type': 'request',
+                'title': f"{r['urgency']} Request: {r['resource_name']} needed at {r['area_name']}",
+                'timestamp': r['request_date'].strftime('%Y-%m-%d %H:%M') if r['request_date'] else '',
+                'severity': 'critical' if r['urgency'] == 'Critical' else 'warning',
+                'link': f"/requests"
+            })
+            
+    # Sort alerts chronologically descending (mock logic given dates)
+    return jsonify(alerts)
