@@ -35,12 +35,24 @@
                     <th>Urgency</th>
                     <th>Status</th>
                     <th>Date</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="requests-body">
                 <tr><td colspan="7" class="loading">Loading requests...</td></tr>
             </tbody>
         </table>
+    </div>
+</div>
+
+<!-- Suggestion Modal -->
+<div id="suggest-modal" class="modal hidden">
+    <div class="modal-content" style="max-width: 600px;">
+        <button class="modal-close" onclick="closeSuggestModal()">&times;</button>
+        <h2>💡 Smart Allocation Suggestion</h2>
+        <div id="suggest-body">
+            <p class="loading">Calculating best allocation path...</p>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -83,6 +95,11 @@ async function loadRequests() {
                     </span>
                 </td>
                 <td>${r.request_date}</td>
+                <td>
+                    ${r.status === 'Pending' || r.status === 'Partially_Fulfilled' ? 
+                        `<button onclick="getSmartSuggestion(${r.request_id})" class="view-btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; border-color: var(--accent-info); color: var(--accent-info);">💡 Smart Allocate</button>` 
+                        : '-'}
+                </td>
             </tr>
         `).join('');
         
@@ -104,6 +121,77 @@ function getStatusIcon(status) {
 
 function formatNumber(num) {
     return num?.toLocaleString() || '0';
+}
+
+async function getSmartSuggestion(requestId) {
+    const modal = document.getElementById('suggest-modal');
+    const body = document.getElementById('suggest-body');
+    
+    modal.classList.remove('hidden');
+    body.innerHTML = '<p class="loading">Analyzing inventory and calculating best allocation...</p>';
+    
+    try {
+        const res = await fetch(`/api/allocate_suggest/${requestId}`);
+        const data = await res.json();
+        
+        if (data.error) {
+            body.innerHTML = `<p class="no-data" style="color:var(--accent-danger)">${data.error}</p>`;
+            return;
+        }
+        
+        if (data.suggestions && data.suggestions.length > 0) {
+            const best = data.suggestions[0];
+            body.innerHTML = `
+                <div class="alert-card ${best.confidence === 'High' ? 'ok' : 'warning'}" style="margin-bottom: 1rem;">
+                    <div class="alert-icon">🤖</div>
+                    <div class="alert-content">
+                        <strong>AI Recommendation</strong><br>
+                        Allocate from <strong>${best.warehouse}</strong>
+                    </div>
+                </div>
+                
+                <p><strong>Resource:</strong> ${data.resource}</p>
+                <p><strong>Quantity Needed:</strong> ${data.quantity_still_needed}</p>
+                
+                <h3 style="margin-top:1.5rem; font-size:1rem;">Available Options</h3>
+                <table class="data-table" style="margin-top:0.5rem;">
+                    <thead>
+                        <tr>
+                            <th>Warehouse</th>
+                            <th>Stock Available</th>
+                            <th>Suggested Alloc.</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.suggestions.map(s => `
+                            <tr>
+                                <td>${s.warehouse}</td>
+                                <td>${s.available}</td>
+                                <td><strong>${s.suggested_allocation}</strong></td>
+                                <td><span class="status-pill ${s.confidence === 'High' ? 'ok' : 'low'}">${s.confidence}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="view-btn" onclick="closeSuggestModal()">Close</button>
+                    <button class="view-btn active" onclick="alert('Allocation executed (Simulated)')">Execute Best Match</button>
+                </div>
+            `;
+        } else {
+             body.innerHTML = `<div class="alert-card warning">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">No sufficient inventory found across all warehouses for this request.</div>
+             </div>`;
+        }
+    } catch (error) {
+        body.innerHTML = `<p class="no-data" style="color:var(--accent-danger)">Error fetching suggestion</p>`;
+    }
+}
+
+function closeSuggestModal() {
+    document.getElementById('suggest-modal').classList.add('hidden');
 }
 
 document.addEventListener('DOMContentLoaded', loadRequests);

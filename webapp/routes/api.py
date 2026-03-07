@@ -409,6 +409,66 @@ def create_request():
     return jsonify({'error': 'Failed to create request'}), 400
 
 
+@api.route('/allocate_suggest/<int:request_id>')
+def allocate_suggest(request_id):
+    """Smart suggestion for resource allocation based on requested resource."""
+    # 1. Get the request details
+    req = query_db("""
+        SELECT r.*, res.resource_name, res.category 
+        FROM Request r
+        INNER JOIN Resource res ON r.resource_id = res.resource_id
+        WHERE r.request_id = %s
+    """, (request_id,), one=True)
+    
+    if not req:
+        return jsonify({'error': 'Request not found'}), 404
+        
+    # Calculate how much is still needed (handle partially fulfilled)
+    allocated = query_db("""
+        SELECT COALESCE(SUM(quantity_allocated), 0) as total 
+        FROM Allocation 
+        WHERE request_id = %s
+    """, (request_id,), one=True)
+    
+    qty_needed = req['quantity_requested'] - (allocated['total'] if allocated else 0)
+    
+    if qty_needed <= 0:
+        return jsonify({'message': 'Fully allocated already', 'suggestions': []})
+        
+    # 2. Find warehouses that have this resource, rank them by quantity desc
+    # In a real app with lat/lon, we would calculate Haversine distance.
+    # Here, we just pick the warehouse with the highest available stock.
+    inventory = query_db("""
+        SELECT i.inventory_id, i.warehouse_location, i.quantity_available,
+               %s as qty_needed
+        FROM Inventory i
+        WHERE i.resource_id = %s AND i.quantity_available > 0
+        ORDER BY i.quantity_available DESC
+    """, (qty_needed, req['resource_id']))
+    
+    suggestions = []
+    if inventory:
+        for inv in inventory:
+            # We suggest to use all needed quantity if available, else max available
+            suggested_qty = min(qty_needed, inv['quantity_available'])
+            
+            suggestions.append({
+                'inventory_id': inv['inventory_id'],
+                'warehouse': inv['warehouse_location'],
+                'available': inv['quantity_available'],
+                'suggested_allocation': suggested_qty,
+                'resource_name': req['resource_name'],
+                'confidence': 'High' if inv['quantity_available'] >= qty_needed else 'Partial'
+            })
+            
+    return jsonify({
+        'request_id': request_id,
+        'resource': req['resource_name'],
+        'quantity_still_needed': qty_needed,
+        'suggestions': suggestions
+    })
+
+
 # ============================================================
 # VOLUNTEERS API
 # ============================================================
