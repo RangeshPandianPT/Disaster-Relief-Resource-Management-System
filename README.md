@@ -81,10 +81,19 @@ python drrms_cli.py inventory alerts
 cd webapp
 pip install -r requirements.txt
 
-# Update database password in config.py
+# Create local environment file for DB connection
+cp .env.example .env
+
+# Edit .env and set your MySQL password and DB name
+# DB_HOST=localhost
+# DB_PORT=3306
+# DB_USER=root
+# DB_PASSWORD=your_mysql_password
+# DB_NAME=drrms_db
 
 python app.py
 # Open http://localhost:5000
+# Verify backend DB connection at http://localhost:5000/api/health/db
 ```
 
 ## 📊 Features
