@@ -9,6 +9,34 @@ api = Blueprint('api', __name__, url_prefix='/api')
 
 
 # ============================================================
+# HEALTH API
+# ============================================================
+
+@api.route('/health/db')
+def health_db():
+    """Check MySQL connectivity from Flask."""
+    ping = query_db("SELECT DATABASE() AS db_name, 1 AS ok", one=True)
+    if not ping:
+        return jsonify({
+            'status': 'error',
+            'message': 'Database connection failed. Check DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME.'
+        }), 500
+
+    table_check = query_db("""
+        SELECT COUNT(*) AS required_tables
+        FROM information_schema.tables
+        WHERE table_schema = DATABASE()
+          AND table_name IN ('Disaster', 'Inventory', 'Request')
+    """, one=True)
+
+    return jsonify({
+        'status': 'ok',
+        'database': ping['db_name'],
+        'requiredTablesFound': table_check['required_tables'] if table_check else 0
+    })
+
+
+# ============================================================
 # DASHBOARD API
 # ============================================================
 
