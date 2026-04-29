@@ -9,7 +9,7 @@ USE drrms_db;
 -- SAMPLE DATA: DISASTER
 -- ============================================================
 INSERT INTO Disaster (disaster_name, disaster_type, severity, start_date, end_date, description, status) VALUES
-('Cyclone Amphan', 'Cyclone', 'Critical', '2024-05-15', '2024-05-25', 'Super cyclone affecting coastal regions of West Bengal and Odisha', 'Resolved'),
+('Cyclone Amphan', 'Cyclone', 'High', '2024-05-15', '2024-05-25', 'Super cyclone affecting coastal regions of West Bengal and Odisha', 'Resolved'),
 ('Kerala Floods 2024', 'Flood', 'High', '2024-08-10', '2024-08-28', 'Heavy monsoon flooding in Kerala affecting multiple districts', 'Resolved'),
 ('Gujarat Earthquake', 'Earthquake', 'Critical', '2024-11-20', NULL, 'Magnitude 6.2 earthquake in Kutch region', 'Active'),
 ('Uttarakhand Forest Fire', 'Fire', 'Medium', '2024-04-05', '2024-04-12', 'Forest fire in Chamoli district affecting surrounding villages', 'Resolved'),
