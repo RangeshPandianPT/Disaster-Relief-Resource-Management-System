@@ -7,10 +7,10 @@
     <meta name="description" content="DRRMS - Disaster Relief Resource Management System for efficient disaster response coordination">
     <title>{% block title %}DRRMS{% endblock %} - Disaster Relief Management</title>
     
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- Ranade Font -->
+    <link rel="preconnect" href="https://api.fontshare.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=ranade@300,400,500,700,800&display=swap" rel="stylesheet">
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -86,6 +86,102 @@
             to { opacity: 0; }
         }
         .toast.hiding { animation: fadeOut 0.3s ease forwards; }
+        
+        /* User Profile Styles */
+        .user-profile-wrapper {
+            position: relative;
+            margin-right: 1rem;
+        }
+        .user-profile-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: var(--transition-fast);
+        }
+        .user-profile-btn:hover {
+            background: var(--bg-secondary);
+        }
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-primary);
+        }
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 0.5rem);
+            right: 0;
+            background: var(--bg-card);
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            min-width: 280px;
+            padding: 1rem;
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.2s ease forwards;
+        }
+        .user-dropdown.show {
+            display: block;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .dropdown-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-primary);
+        }
+        .user-details {
+            flex: 1;
+            min-width: 0;
+        }
+        .user-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .user-email {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .dropdown-divider {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 0.5rem 0;
+        }
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            background: none;
+            border: none;
+            border-radius: 4px;
+            color: var(--text-primary);
+            cursor: pointer;
+            text-decoration: none;
+            transition: var(--transition-fast);
+            font-size: 0.95rem;
+        }
+        .dropdown-item:hover {
+            background: var(--bg-secondary);
+        }
+        .logout-btn {
+            color: var(--accent-danger);
+        }
     </style>
     
     {% block head %}{% endblock %}
@@ -94,44 +190,57 @@
     <!-- Navigation -->
     <nav class="navbar" role="navigation" aria-label="Main navigation">
         <div class="nav-brand">
-            <span class="nav-icon">🌍</span>
             <span class="nav-title">DRRMS</span>
+            <span class="nav-subtitle">Disaster Relief Management</span>
         </div>
         
         <ul class="nav-links" id="navLinks" role="menubar">
-            <li role="none"><a href="/" role="menuitem" class="{% if active_page == 'dashboard' %}active{% endif %}">
-                <span>📊</span> Dashboard
-            </a></li>
-            <li role="none"><a href="/disasters" role="menuitem" class="{% if active_page == 'disasters' %}active{% endif %}">
-                <span>🌀</span> Disasters
-            </a></li>
-            <li role="none"><a href="/inventory" role="menuitem" class="{% if active_page == 'inventory' %}active{% endif %}">
-                <span>📦</span> Inventory
-            </a></li>
-            <li role="none"><a href="/requests" role="menuitem" class="{% if active_page == 'requests' %}active{% endif %}">
-                <span>📋</span> Requests
-            </a></li>
-            <li role="none"><a href="/volunteers" role="menuitem" class="{% if active_page == 'volunteers' %}active{% endif %}">
-                <span>👥</span> Volunteers
-            </a></li>
-            <li role="none"><a href="/donations" role="menuitem" class="{% if active_page == 'donations' %}active{% endif %}">
-                <span>💰</span> Donations
-            </a></li>
+            <li role="none"><a href="/" role="menuitem" class="{% if active_page == 'dashboard' %}active{% endif %}">Dashboard</a></li>
+            <li role="none"><a href="/disasters" role="menuitem" class="{% if active_page == 'disasters' %}active{% endif %}">Disasters</a></li>
+            <li role="none"><a href="/inventory" role="menuitem" class="{% if active_page == 'inventory' %}active{% endif %}">Inventory</a></li>
+            <li role="none"><a href="/requests" role="menuitem" class="{% if active_page == 'requests' %}active{% endif %}">Requests</a></li>
+            <li role="none"><a href="/volunteers" role="menuitem" class="{% if active_page == 'volunteers' %}active{% endif %}">Volunteers</a></li>
+            <li role="none"><a href="/donations" role="menuitem" class="{% if active_page == 'donations' %}active{% endif %}">Donations</a></li>
         </ul>
         
         <div class="nav-actions">
             <!-- Notifications Bell -->
             <div class="notifications-wrapper">
                 <button class="bell-btn tooltip" aria-label="Notifications" data-tooltip="Live Alerts">
-                    🔔
+                    <svg class="nav-icon-svg" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm8-6V11a8 8 0 1 0-16 0v5l-2 2v1h20v-1l-2-2Zm-2 1H6v-6a6 6 0 1 1 12 0v6Z" fill="currentColor"/>
+                    </svg>
                     <span class="badge-count" id="notif-badge">0</span>
                 </button>
             </div>
             
-            <button class="theme-toggle tooltip" id="themeToggle" aria-label="Toggle theme" data-tooltip="Switch theme">
-                <span class="theme-toggle-icon" id="themeIcon">☀️</span>
-                <span class="theme-toggle-text" id="themeText">Light</span>
+            <button class="theme-toggle tooltip" id="themeToggle" aria-label="Toggle theme" data-tooltip="Switch theme" type="button">
+                <svg class="theme-toggle-icon" id="themeIcon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 3a1 1 0 0 1 1 1v1.07a8 8 0 0 1 6.93 6.93H21a1 1 0 1 1 0 2h-1.07a8 8 0 0 1-6.93 6.93V21a1 1 0 1 1-2 0v-1.07a8 8 0 0 1-6.93-6.93H3a1 1 0 1 1 0-2h1.07A8 8 0 0 1 10 5.07V4a1 1 0 0 1 1-1Zm0 4a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z" fill="currentColor"/>
+                </svg>
+                <span class="theme-toggle-text" id="themeText">Light mode</span>
             </button>
+            
+            <!-- User Profile -->
+            <div class="user-profile-wrapper" id="userProfileWrapper" style="display: none;">
+                <button class="user-profile-btn tooltip" id="userProfileBtn" aria-label="User menu" data-tooltip="Profile">
+                    <img id="userAvatar" src="" alt="User avatar" class="user-avatar">
+                </button>
+                <div class="user-dropdown" id="userDropdown">
+                    <div class="user-info">
+                        <img id="dropdownAvatar" src="" alt="User avatar" class="dropdown-avatar">
+                        <div class="user-details">
+                            <div class="user-name" id="userName"></div>
+                            <div class="user-email" id="userEmail"></div>
+                        </div>
+                    </div>
+                    <hr class="dropdown-divider">
+                    <a href="/auth/logout" class="dropdown-item logout-btn">
+                        Logout
+                    </a>
+                </div>
+            </div>
+            
             <!-- Hamburger Menu Button -->
             <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false">
                 <span></span>
@@ -164,6 +273,59 @@
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+    
+    <!-- User Profile & Authentication JS -->
+    <script>
+        // Load user profile on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserProfile();
+        });
+        
+        function loadUserProfile() {
+            fetch('/auth/user')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.user) {
+                        const user = data.user;
+                        
+                        // Show user profile wrapper
+                        document.getElementById('userProfileWrapper').style.display = 'block';
+                        
+                        // Set user avatar and info
+                        const avatarUrl = user.picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.email)}&background=3b82f6&color=fff`;
+                        
+                        document.getElementById('userAvatar').src = avatarUrl;
+                        document.getElementById('dropdownAvatar').src = avatarUrl;
+                        document.getElementById('userName').textContent = user.name || 'User';
+                        document.getElementById('userEmail').textContent = user.email || '';
+                        
+                        // Setup dropdown toggle
+                        setupUserDropdown();
+                    }
+                })
+                .catch(error => console.error('Error loading user profile:', error));
+        }
+        
+        function setupUserDropdown() {
+            const userProfileBtn = document.getElementById('userProfileBtn');
+            const userDropdown = document.getElementById('userDropdown');
+            
+            if (userProfileBtn && userDropdown) {
+                userProfileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!userProfileBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+            }
+        }
+    </script>
+    
     {% block scripts %}{% endblock %}
 </body>
 </html>
