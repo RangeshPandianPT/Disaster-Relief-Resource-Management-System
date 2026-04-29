@@ -5,13 +5,13 @@
 {% block content %}
 <div class="page-container">
     <div class="page-header">
-        <h1 class="page-title">👥 Volunteer Directory</h1>
+        <h1 class="page-title">Volunteer Directory</h1>
         <div class="page-actions">
             <select id="availability-filter" class="filter-select" onchange="loadVolunteers()">
                 <option value="">All Availability</option>
-                <option value="Available">✅ Available</option>
-                <option value="Busy">🔄 Deployed</option>
-                <option value="Unavailable">❌ Unavailable</option>
+                <option value="Available">Available</option>
+                <option value="Busy">Deployed</option>
+                <option value="Unavailable">Unavailable</option>
             </select>
         </div>
     </div>
@@ -48,13 +48,13 @@ async function loadVolunteers() {
                     </span>
                 </div>
                 <h3>${v.name}</h3>
-                <p class="skills">🛠️ ${v.skills || 'No skills listed'}</p>
-                <p class="experience">📊 ${v.experience_years || 0} years experience</p>
+                <p class="skills">Skills: ${v.skills || 'No skills listed'}</p>
+                <p class="experience">Experience: ${v.experience_years || 0} years</p>
                 ${v.team_name ? `
                     <div class="assignment">
                         <strong>Assigned to:</strong>
                         <p>${v.team_name} (${v.team_type})</p>
-                        <p>🌀 ${v.disaster_name}</p>
+                        <p>${v.disaster_name}</p>
                     </div>
                 ` : '<p class="unassigned">Not assigned to any team</p>'}
             </div>
@@ -66,7 +66,7 @@ async function loadVolunteers() {
 }
 
 function getAvailabilityIcon(availability) {
-    return {'Available': '✅', 'Busy': '🔄', 'Unavailable': '❌'}[availability] || '❓';
+    return {'Available': 'Available', 'Busy': 'Deployed', 'Unavailable': 'Unavailable'}[availability] || 'Unknown';
 }
 
 document.addEventListener('DOMContentLoaded', loadVolunteers);

@@ -5,15 +5,15 @@
 {% block content %}
 <div class="page-container">
     <div class="page-header">
-        <h1 class="page-title">📦 Inventory Management</h1>
+        <h1 class="page-title">Inventory Management</h1>
         <div class="page-actions">
             <select id="category-filter" class="filter-select" onchange="loadInventory()">
                 <option value="">All Categories</option>
-                <option value="Food">🍚 Food</option>
-                <option value="Water">💧 Water</option>
-                <option value="Medicine">💊 Medicine</option>
-                <option value="Shelter">🏕️ Shelter</option>
-                <option value="Clothing">👕 Clothing</option>
+                <option value="Food">Food</option>
+                <option value="Water">Water</option>
+                <option value="Medicine">Medicine</option>
+                <option value="Shelter">Shelter</option>
+                <option value="Clothing">Clothing</option>
             </select>
             <label class="checkbox-label">
                 <input type="checkbox" id="low-stock-filter" onchange="loadInventory()">
@@ -42,7 +42,7 @@
     
     <!-- Alerts Section -->
     <div class="alerts-section" id="alerts-section">
-        <h3>⚠️ Low Stock Alerts</h3>
+        <h3>Low Stock Alerts</h3>
         <div id="alerts-container" class="alerts-container"></div>
     </div>
 </div>
@@ -109,7 +109,7 @@ async function loadAlerts() {
         container.innerHTML = alerts.map(a => `
             <div class="alert-card ${a.quantity_available === 0 ? 'critical' : 'warning'}">
                 <div class="alert-header">
-                    <span class="alert-icon">${a.quantity_available === 0 ? '🔴' : '🟡'}</span>
+                    <span class="alert-icon ${a.quantity_available === 0 ? 'critical' : 'warning'}">${a.quantity_available === 0 ? 'Critical' : 'Warning'}</span>
                     <strong>${a.resource_name}</strong>
                 </div>
                 <p>${a.warehouse_location}</p>
@@ -130,11 +130,11 @@ async function loadAlerts() {
 }
 
 function getCategoryIcon(category) {
-    return {'Food': '🍚', 'Water': '💧', 'Medicine': '💊', 'Shelter': '🏕️', 'Clothing': '👕'}[category] || '📦';
+    return {'Food': 'Food', 'Water': 'Water', 'Medicine': 'Medicine', 'Shelter': 'Shelter', 'Clothing': 'Clothing'}[category] || 'Other';
 }
 
 function getStatusIcon(status) {
-    return {'OUT': '🔴', 'LOW': '🟡', 'OK': '🟢'}[status] || '⚪';
+    return {'OUT': 'Out', 'LOW': 'Low', 'OK': 'OK'}[status] || 'Unknown';
 }
 
 function formatNumber(num) {

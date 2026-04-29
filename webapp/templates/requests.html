@@ -5,7 +5,7 @@
 {% block content %}
 <div class="page-container">
     <div class="page-header">
-        <h1 class="page-title">📋 Resource Requests</h1>
+        <h1 class="page-title">Resource Requests</h1>
         <div class="page-actions">
             <select id="status-filter" class="filter-select" onchange="loadRequests()">
                 <option value="">All Status</option>
@@ -16,10 +16,10 @@
             </select>
             <select id="urgency-filter" class="filter-select" onchange="loadRequests()">
                 <option value="">All Urgency</option>
-                <option value="Critical">🔴 Critical</option>
-                <option value="High">🟠 High</option>
-                <option value="Medium">🟡 Medium</option>
-                <option value="Low">🟢 Low</option>
+                <option value="Critical">Critical</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
             </select>
         </div>
     </div>
@@ -49,7 +49,7 @@
 <div id="suggest-modal" class="modal hidden">
     <div class="modal-content" style="max-width: 600px;">
         <button class="modal-close" onclick="closeSuggestModal()">&times;</button>
-        <h2>💡 Smart Allocation Suggestion</h2>
+        <h2>Smart Allocation Suggestion</h2>
         <div id="suggest-body">
             <p class="loading">Calculating best allocation path...</p>
         </div>
@@ -97,7 +97,7 @@ async function loadRequests() {
                 <td>${r.request_date}</td>
                 <td>
                     ${r.status === 'Pending' || r.status === 'Partially_Fulfilled' ? 
-                        `<button onclick="getSmartSuggestion(${r.request_id})" class="view-btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; border-color: var(--accent-info); color: var(--accent-info);">💡 Smart Allocate</button>` 
+                        `<button onclick="getSmartSuggestion(${r.request_id})" class="view-btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; border-color: var(--accent-info); color: var(--accent-info);">Smart Allocate</button>` 
                         : '-'}
                 </td>
             </tr>
@@ -109,14 +109,14 @@ async function loadRequests() {
 }
 
 function getUrgencyIcon(urgency) {
-    return {'Critical': '🔴', 'High': '🟠', 'Medium': '🟡', 'Low': '🟢'}[urgency] || '⚪';
+    return {'Critical': 'Critical', 'High': 'High', 'Medium': 'Medium', 'Low': 'Low'}[urgency] || 'Unknown';
 }
 
 function getStatusIcon(status) {
     return {
-        'Pending': '⏳', 'Approved': '👍', 'Fulfilled': '✅',
-        'Partially_Fulfilled': '🔄', 'Rejected': '❌'
-    }[status] || '❓';
+        'Pending': 'Pending', 'Approved': 'Approved', 'Fulfilled': 'Fulfilled',
+        'Partially_Fulfilled': 'Partial', 'Rejected': 'Rejected'
+    }[status] || 'Unknown';
 }
 
 function formatNumber(num) {
@@ -143,7 +143,7 @@ async function getSmartSuggestion(requestId) {
             const best = data.suggestions[0];
             body.innerHTML = `
                 <div class="alert-card ${best.confidence === 'High' ? 'ok' : 'warning'}" style="margin-bottom: 1rem;">
-                    <div class="alert-icon">🤖</div>
+                    <div class="alert-icon">Recommendation</div>
                     <div class="alert-content">
                         <strong>AI Recommendation</strong><br>
                         Allocate from <strong>${best.warehouse}</strong>
@@ -181,7 +181,7 @@ async function getSmartSuggestion(requestId) {
             `;
         } else {
              body.innerHTML = `<div class="alert-card warning">
-                <div class="alert-icon">⚠️</div>
+                     <div class="alert-icon">Warning</div>
                 <div class="alert-content">No sufficient inventory found across all warehouses for this request.</div>
              </div>`;
         }
