@@ -20,6 +20,21 @@ class Config:
     DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Rangesh@07')
     DB_NAME = os.environ.get('DB_NAME', 'drrms_db')
     
+    # Firebase Configuration
+    FIREBASE_API_KEY = os.environ.get('FIREBASE_API_KEY', '')
+    FIREBASE_AUTH_DOMAIN = os.environ.get('FIREBASE_AUTH_DOMAIN', '')
+    FIREBASE_PROJECT_ID = os.environ.get('FIREBASE_PROJECT_ID', '')
+    FIREBASE_STORAGE_BUCKET = os.environ.get('FIREBASE_STORAGE_BUCKET', '')
+    FIREBASE_MESSAGING_SENDER_ID = os.environ.get('FIREBASE_MESSAGING_SENDER_ID', '')
+    FIREBASE_APP_ID = os.environ.get('FIREBASE_APP_ID', '')
+    FIREBASE_MEASUREMENT_ID = os.environ.get('FIREBASE_MEASUREMENT_ID', '')
+    FIREBASE_CREDENTIALS_PATH = os.environ.get('FIREBASE_CREDENTIALS_PATH', 'firebase-credentials.json')
+    
+    # Session Configuration
+    SESSION_TYPE = 'filesystem'
+    SESSION_PERMANENT = False
+    SESSION_USE_SIGNER = True
+    
     # App settings
     DEBUG = False
     TESTING = False

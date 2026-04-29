@@ -48,7 +48,7 @@
 {% block content %}
 <div class="page-container">
     <div class="page-header">
-        <h1 class="page-title">🌀 Disaster Management</h1>
+        <h1 class="page-title">Disaster Management</h1>
         <div class="page-actions">
             <select id="status-filter" class="filter-select" onchange="loadDisasters()">
                 <option value="">All Status</option>
@@ -60,8 +60,8 @@
     </div>
     
     <div class="view-toggle">
-        <button class="view-btn active" onclick="toggleView('list')" id="btn-list">📋 List View</button>
-        <button class="view-btn" onclick="toggleView('map')" id="btn-map">🗺️ Map View</button>
+        <button class="view-btn active" onclick="toggleView('list')" id="btn-list">List View</button>
+        <button class="view-btn" onclick="toggleView('map')" id="btn-map">Map View</button>
     </div>
     
     <div id="map-container" class="hidden"></div>
@@ -105,10 +105,10 @@ async function loadDisasters() {
                 </div>
                 <h3>${d.disaster_name}</h3>
                 <p class="disaster-type">${getTypeIcon(d.disaster_type)} ${d.disaster_type}</p>
-                <p class="disaster-location">📍 ${d.affected_location}</p>
+                <p class="disaster-location">${d.affected_location}</p>
                 <div class="card-stats">
-                    <span>📍 ${d.area_count} areas</span>
-                    <span>👥 ${formatNumber(d.total_affected)} affected</span>
+                    <span>${d.area_count} areas</span>
+                    <span>${formatNumber(d.total_affected)} affected</span>
                 </div>
                 <div class="card-footer">
                     <span>Started: ${d.start_date}</span>
@@ -146,26 +146,26 @@ async function viewDisaster(id) {
                     ${d.description ? `<p><strong>Description:</strong> ${d.description}</p>` : ''}
                 </div>
                 
-                <h3>📍 Affected Areas (${data.areas.length})</h3>
+                <h3>Affected Areas (${data.areas.length})</h3>
                 <div class="areas-list">
                     ${data.areas.map(a => `
                         <div class="area-item">
                             <span class="priority-badge ${a.priority.toLowerCase()}">${a.priority}</span>
                             <strong>${a.area_name}</strong>
                             <span>${a.district}, ${a.state}</span>
-                            <span>👥 ${formatNumber(a.population_affected)}</span>
+                            <span>${formatNumber(a.population_affected)}</span>
                         </div>
                     `).join('')}
                 </div>
                 
-                <h3>👥 Relief Teams (${data.teams.length})</h3>
+                <h3>Relief Teams (${data.teams.length})</h3>
                 <div class="teams-list">
                     ${data.teams.map(t => `
                         <div class="team-item">
                             <strong>${t.team_name}</strong>
                             <span class="team-type">${t.team_type}</span>
                             <span>Leader: ${t.leader_name}</span>
-                            <span>👷 ${t.volunteer_count} volunteers</span>
+                            <span>${t.volunteer_count} volunteers</span>
                             <span class="status-badge ${t.status.toLowerCase()}">${t.status}</span>
                         </div>
                     `).join('')}
@@ -185,11 +185,11 @@ function closeModal() {
 }
 
 function getSeverityIcon(severity) {
-    return {'Extreme': '🔴', 'Severe': '🟠', 'Moderate': '🟡', 'Minor': '🟢'}[severity] || '⚪';
+    return {'Extreme': 'Critical', 'Severe': 'High', 'Moderate': 'Medium', 'Minor': 'Low'}[severity] || 'Unknown';
 }
 
 function getTypeIcon(type) {
-    return {'Flood': '🌊', 'Cyclone': '🌀', 'Earthquake': '🌍', 'Drought': '☀️', 'Landslide': '⛰️'}[type] || '💥';
+    return {'Flood': 'Flood', 'Cyclone': 'Cyclone', 'Earthquake': 'Earthquake', 'Drought': 'Drought', 'Landslide': 'Landslide'}[type] || 'Other';
 }
 
 function formatNumber(num) {

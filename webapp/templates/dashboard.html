@@ -3,14 +3,23 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="dashboard">
-    <h1 class="page-title">📊 Dashboard</h1>
-    <p class="page-subtitle">Real-time overview of disaster relief operations</p>
+<div class="dashboard dashboard-shell">
+    <section class="dashboard-hero">
+        <div class="dashboard-hero-copy">
+            <span class="dashboard-eyebrow">Operations overview</span>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-subtitle">Real-time overview of disaster relief operations</p>
+        </div>
+        <div class="dashboard-hero-meta">
+            <div class="hero-pill hero-pill-primary">Live command center</div>
+            <div class="hero-pill">Updated in real time</div>
+        </div>
+    </section>
     
     <!-- Stats Cards -->
     <div class="stats-grid">
         <div class="stat-card stat-disasters">
-            <div class="stat-icon">🌀</div>
+            <div class="stat-icon stat-icon-disasters" aria-hidden="true"></div>
             <div class="stat-content">
                 <span class="stat-value" id="stat-disasters">-</span>
                 <span class="stat-label">Active Disasters</span>
@@ -19,7 +28,7 @@
         </div>
         
         <div class="stat-card stat-population">
-            <div class="stat-icon">👥</div>
+            <div class="stat-icon stat-icon-population" aria-hidden="true"></div>
             <div class="stat-content">
                 <span class="stat-value" id="stat-population">-</span>
                 <span class="stat-label">Affected Population</span>
@@ -27,7 +36,7 @@
         </div>
         
         <div class="stat-card stat-requests">
-            <div class="stat-icon">📋</div>
+            <div class="stat-icon stat-icon-requests" aria-hidden="true"></div>
             <div class="stat-content">
                 <span class="stat-value" id="stat-requests">-</span>
                 <span class="stat-label">Pending Requests</span>
@@ -36,7 +45,7 @@
         </div>
         
         <div class="stat-card stat-volunteers">
-            <div class="stat-icon">👷</div>
+            <div class="stat-icon stat-icon-volunteers" aria-hidden="true"></div>
             <div class="stat-content">
                 <span class="stat-value" id="stat-volunteers">-</span>
                 <span class="stat-label">Volunteers Deployed</span>
@@ -44,7 +53,7 @@
         </div>
         
         <div class="stat-card stat-alerts">
-            <div class="stat-icon">⚠️</div>
+            <div class="stat-icon stat-icon-alerts" aria-hidden="true"></div>
             <div class="stat-content">
                 <span class="stat-value" id="stat-alerts">-</span>
                 <span class="stat-label">Low Stock Alerts</span>
@@ -52,7 +61,7 @@
         </div>
         
         <div class="stat-card stat-donations">
-            <div class="stat-icon">💰</div>
+            <div class="stat-icon stat-icon-donations" aria-hidden="true"></div>
             <div class="stat-content">
                 <span class="stat-value" id="stat-donations">-</span>
                 <span class="stat-label">Donations (30 days)</span>
@@ -63,7 +72,7 @@
     <!-- Charts Row 1 -->
     <div class="charts-row">
         <div class="chart-card">
-            <h3>🎯 Request Fulfillment Rate</h3>
+            <h3>Request Fulfillment Rate</h3>
             <div class="fulfillment-gauge">
                 <canvas id="fulfillmentChart"></canvas>
                 <div class="gauge-value" id="gauge-value">0%</div>
@@ -71,12 +80,12 @@
         </div>
         
         <div class="chart-card">
-            <h3>🌀 Disasters by Type</h3>
+            <h3>Disasters by Type</h3>
             <canvas id="disasterTypesChart"></canvas>
         </div>
         
         <div class="chart-card">
-            <h3>📊 Request Status</h3>
+            <h3>Request Status</h3>
             <canvas id="requestStatusChart"></canvas>
         </div>
     </div>
@@ -84,19 +93,19 @@
     <!-- Charts Row 2 -->
     <div class="charts-row">
         <div class="chart-card wide">
-            <h3>📈 Donation Trends (12 Months)</h3>
+            <h3>Donation Trends (12 Months)</h3>
             <canvas id="donationTrendsChart"></canvas>
         </div>
         
         <div class="chart-card">
-            <h3>📦 Resource Levels by Category</h3>
+            <h3>Resource Levels by Category</h3>
             <canvas id="resourceLevelsChart"></canvas>
         </div>
     </div>
     
     <!-- Alerts Section -->
     <div class="alerts-section">
-        <h3>⚠️ Active Alerts</h3>
+        <h3>Active Alerts</h3>
         <div id="alerts-container" class="alerts-container">
             <p class="loading">Loading alerts...</p>
         </div>
@@ -117,14 +126,14 @@ async function loadDashboard() {
         // Update stat cards
         document.getElementById('stat-disasters').textContent = stats.disasters?.count || 0;
         document.getElementById('stat-disasters-detail').textContent = 
-            `🔴 ${stats.disasters?.extreme || 0} Extreme | 🟠 ${stats.disasters?.severe || 0} Severe`;
+            `${stats.disasters?.extreme || 0} Extreme | ${stats.disasters?.severe || 0} Severe`;
         
         document.getElementById('stat-population').textContent = 
             formatNumber(stats.population || 0);
         
         document.getElementById('stat-requests').textContent = stats.requests?.total || 0;
         document.getElementById('stat-requests-detail').textContent = 
-            `🔴 ${stats.requests?.critical || 0} Critical | 🟠 ${stats.requests?.high || 0} High`;
+            `${stats.requests?.critical || 0} Critical | ${stats.requests?.high || 0} High`;
         
         document.getElementById('stat-volunteers').textContent = 
             `${stats.volunteers?.deployed || 0}/${stats.volunteers?.total || 0}`;
@@ -282,13 +291,13 @@ async function loadAlerts() {
     const container = document.getElementById('alerts-container');
     
     if (alerts.length === 0) {
-        container.innerHTML = '<p class="no-alerts">✅ No active alerts. All inventory levels are healthy!</p>';
+        container.innerHTML = '<p class="no-alerts">No active alerts. All inventory levels are healthy.</p>';
         return;
     }
     
     container.innerHTML = alerts.slice(0, 5).map(a => `
         <div class="alert-item ${a.quantity_available === 0 ? 'critical' : 'warning'}">
-            <span class="alert-icon">${a.quantity_available === 0 ? '🔴' : '🟡'}</span>
+            <span class="alert-icon ${a.quantity_available === 0 ? 'critical' : 'warning'}">${a.quantity_available === 0 ? 'Critical' : 'Warning'}</span>
             <div class="alert-content">
                 <strong>${a.resource_name}</strong>
                 <span>${a.warehouse_location}</span>

@@ -5,17 +5,17 @@
 {% block content %}
 <div class="page-container">
     <div class="page-header">
-        <h1 class="page-title">💰 Donations</h1>
+        <h1 class="page-title">Donations</h1>
     </div>
     
     <!-- Donor Summary -->
-    <h2>🏆 Top Donors</h2>
+    <h2>Top Donors</h2>
     <div class="cards-grid small" id="donors-container">
         <p class="loading">Loading donors...</p>
     </div>
     
     <!-- Recent Donations -->
-    <h2 style="margin-top: 2rem;">📋 Recent Donations</h2>
+    <h2 style="margin-top: 2rem;">Recent Donations</h2>
     <div class="table-container">
         <table class="data-table" id="donations-table">
             <thead>
@@ -52,8 +52,8 @@ async function loadDonations() {
                 <h4>${d.donor_name}</h4>
                 <p class="donor-type">${d.donor_type}</p>
                 <div class="donor-stats">
-                    <span>💰 ₹${formatNumber(d.total_monetary)}</span>
-                    <span>📦 ${d.donation_count} donations</span>
+                    <span>₹${formatNumber(d.total_monetary)}</span>
+                    <span>${d.donation_count} donations</span>
                 </div>
             </div>
         `).join('');
@@ -75,7 +75,7 @@ async function loadDonations() {
                     <strong>${d.donor_name}</strong>
                     <span class="donor-type-small">${d.donor_type}</span>
                 </td>
-                <td>${d.donation_type === 'Money' ? '💵' : '📦'} ${d.donation_type}</td>
+                <td>${d.donation_type}</td>
                 <td>${d.disaster_name || 'General Fund'}</td>
                 <td>
                     ${d.donation_type === 'Money' 
@@ -94,7 +94,7 @@ async function loadDonations() {
 }
 
 function getDonorIcon(type) {
-    return {'Corporate': '🏢', 'Individual': '👤', 'NGO': '🤝'}[type] || '❓';
+    return {'Corporate': 'Corporate', 'Individual': 'Individual', 'NGO': 'NGO'}[type] || 'Other';
 }
 
 function formatNumber(num) {

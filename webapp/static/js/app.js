@@ -91,16 +91,31 @@ function setTheme(theme) {
     const html = document.documentElement;
     const themeIcon = document.getElementById('themeIcon');
     const themeText = document.getElementById('themeText');
+    const themeToggle = document.getElementById('themeToggle');
+    
+    // SVG paths for sun and moon icons
+    const sunPath = 'M12 3a1 1 0 0 1 1 1v1.07a8 8 0 0 1 6.93 6.93H21a1 1 0 1 1 0 2h-1.07a8 8 0 0 1-6.93 6.93V21a1 1 0 1 1-2 0v-1.07a8 8 0 0 1-6.93-6.93H3a1 1 0 1 1 0-2h1.07A8 8 0 0 1 10 5.07V4a1 1 0 0 1 1-1Zm0 4a5 5 0 1 0 0 10a5 5 0 0 0 0-10Z';
+    const moonPath = 'M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79Z';
     
     if (theme === 'dark') {
         html.setAttribute('data-theme', 'dark');
-        if (themeIcon) themeIcon.textContent = '🌙';
-        if (themeText) themeText.textContent = 'Dark';
+        if (themeIcon) {
+            themeIcon.classList.add('dark');
+            const pathEl = themeIcon.querySelector('path');
+            if (pathEl) pathEl.setAttribute('d', moonPath);
+        }
+        if (themeText) themeText.textContent = 'Dark mode';
+        if (themeToggle) themeToggle.setAttribute('aria-pressed', 'true');
         updateChartColors(true);
     } else {
         html.removeAttribute('data-theme');
-        if (themeIcon) themeIcon.textContent = '☀️';
-        if (themeText) themeText.textContent = 'Light';
+        if (themeIcon) {
+            themeIcon.classList.remove('dark');
+            const pathEl = themeIcon.querySelector('path');
+            if (pathEl) pathEl.setAttribute('d', sunPath);
+        }
+        if (themeText) themeText.textContent = 'Light mode';
+        if (themeToggle) themeToggle.setAttribute('aria-pressed', 'false');
         updateChartColors(false);
     }
     
@@ -137,6 +152,14 @@ function updateChartColors(isDark) {
 
 // Initialize theme before page renders (prevent flash)
 initTheme();
+
+// Bind theme toggle on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+    }
+});
 
 // ============================================================
 // HAMBURGER MENU FUNCTIONALITY
@@ -321,13 +344,7 @@ function initResizeHandler() {
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🌍 DRRMS Web Application Loaded');
-    
-    // Initialize theme toggle
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-        themeToggle.addEventListener('click', toggleTheme);
-    }
+    console.log('DRRMS Web Application Loaded');
     
     // Re-apply theme on DOM load
     const savedTheme = localStorage.getItem('drrms-theme') || 'light';
