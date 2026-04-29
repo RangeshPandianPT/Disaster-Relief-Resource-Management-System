@@ -105,7 +105,7 @@ DELIMITER //
 CREATE FUNCTION fn_resource_shortage_level(p_resource_id INT)
 RETURNS VARCHAR(20)
 DETERMINISTIC
-READS SQL DATA 
+READS SQL DATA
 BEGIN
     DECLARE total_stock INT DEFAULT 0;
     DECLARE min_stock INT DEFAULT 0;
@@ -137,7 +137,7 @@ BEGIN
     END IF;
 END //
 
-DELIMITER ;     
+DELIMITER ;
 
 -- ============================================================
 -- FUNCTION 5: Volunteer Workload Score
