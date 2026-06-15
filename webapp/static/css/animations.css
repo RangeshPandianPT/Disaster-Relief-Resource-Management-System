@@ -1,0 +1,75 @@
+/* Dynamic Micro-Animations for DRRMS */
+
+/* Fade-in up for cards */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.stat-card, .chart-card, .disaster-card, .alert-card, .table-container {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Staggered animation delays */
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.15s; }
+.stat-card:nth-child(3) { animation-delay: 0.2s; }
+.stat-card:nth-child(4) { animation-delay: 0.25s; }
+.stat-card:nth-child(5) { animation-delay: 0.3s; }
+.stat-card:nth-child(6) { animation-delay: 0.35s; }
+
+/* Pulse animation for bells and critical alerts */
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(214, 69, 69, 0.6); }
+    70% { box-shadow: 0 0 0 8px rgba(214, 69, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(214, 69, 69, 0); }
+}
+
+.badge-count.visible {
+    animation: pulseGlow 2s infinite;
+}
+
+/* Hover lift and glow */
+.btn-primary, .hero-pill-primary, .bell-btn, .user-profile-btn {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-primary:hover, .hero-pill-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(18, 56, 214, 0.25);
+}
+
+.nav-links a {
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--accent-primary);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateX(-50%);
+    border-radius: 2px;
+}
+
+.nav-links a:hover::after {
+    width: 60%;
+}
+
+.nav-links a.active::after {
+    display: none;
+}
+
+/* Smooth Table Row Transitions */
+.data-table tbody tr {
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.data-table tbody tr:hover {
+    transform: translateX(4px);
+}
