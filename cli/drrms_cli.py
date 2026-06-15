@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from db_connection import test_connection
 from commands import disaster, inventory, request, report
+from commands.export_cmd import export
 
 
 @click.group()
@@ -41,6 +42,7 @@ cli.add_command(disaster)
 cli.add_command(inventory)
 cli.add_command(request)
 cli.add_command(report)
+cli.add_command(export)
 
 
 @cli.command()
