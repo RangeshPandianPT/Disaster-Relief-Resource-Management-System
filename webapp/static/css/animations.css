@@ -73,3 +73,65 @@
 .data-table tbody tr:hover {
     transform: translateX(4px);
 }
+
+/* Shimmer Effect for Loading States */
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+.shimmer {
+    animation: shimmer 2s infinite linear;
+    background: linear-gradient(to right, rgba(255,255,255,0) 4%, rgba(255,255,255,0.25) 25%, rgba(255,255,255,0) 36%);
+    background-size: 1000px 100%;
+}
+
+/* Floating Animation for Hero Images/Icons */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.floating-icon {
+    animation: float 4s ease-in-out infinite;
+}
+
+/* Gradient Background Pan */
+@keyframes gradientPan {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.bg-pan {
+    background-size: 200% 200%;
+    animation: gradientPan 10s ease infinite;
+}
+
+/* Advanced 3D Hover Lift for Cards */
+.stat-card:hover, .chart-card:hover, .disaster-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(18, 56, 214, 0.15), 0 0 20px rgba(18, 56, 214, 0.1) inset;
+    border-color: rgba(18, 56, 214, 0.3);
+}
+
+/* Glassmorphism Shine Effect on Hover */
+.stat-card::before, .chart-card::before, .disaster-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    transition: all 0.75s ease;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.stat-card:hover::before, .chart-card:hover::before, .disaster-card:hover::before {
+    left: 200%;
+}
+
