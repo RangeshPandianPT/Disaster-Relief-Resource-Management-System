@@ -380,6 +380,8 @@ body::before {
     transition: var(--transition-normal);
     backdrop-filter: blur(18px);
     box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
 }
 
 .stat-card:hover {
@@ -504,6 +506,8 @@ body::before {
     padding: 1.5rem;
     backdrop-filter: blur(18px);
     box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
 }
 
 .chart-card.wide {
@@ -553,6 +557,8 @@ body::before {
     padding: 1.5rem;
     cursor: pointer;
     transition: var(--transition-normal);
+    position: relative;
+    overflow: hidden;
 }
 
 .disaster-card:hover {
